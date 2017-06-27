@@ -34,12 +34,13 @@ public class HabitUtils {
         }
     }
 
-    public static void readHabits(Context context) {
+    public static Cursor getHabitCursor(Context context) {
         HabitDbHelper dbHelper = new HabitDbHelper(context);
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         String[] projection = {
+                HabitEntry._ID,
                 HabitEntry.COLUMN_HABIT_NAME,
                 HabitEntry.COLUMN_HABIT_DESCRIPTION,
                 HabitEntry.COLUMN_HABIT_DATETIME
@@ -52,7 +53,7 @@ public class HabitUtils {
 
         Cursor cursor = db.query(
                 HabitEntry.TABLE_NAME,                      // Table
-                null,                                       // Returned column
+                projection,                                       // Returned column
                 null,                                       // WHERE clause tables
                 null,                                       // WHERE clause values
                 null,
@@ -60,9 +61,13 @@ public class HabitUtils {
                 null                                        // Sort order
         );
 
+        return cursor;
+    }
+
+    public static String readHabitCursor(Cursor cursor){
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append("Number of rows in habit database table: " + cursor.getCount());
+            sb.append("Number of rows in habit database table: " + cursor.getCount() + "\n");
 
             sb.append(HabitEntry._ID + " - " +
                     HabitEntry.COLUMN_HABIT_NAME + " - " +
@@ -78,7 +83,7 @@ public class HabitUtils {
                 int currentID = cursor.getInt(idColumnIndex);
                 String currentName = cursor.getString(nameColumnIndex);
                 String currentDescription = cursor.getString(descriptionColumnIndex);
-                Integer currentDatetime = cursor.getInt(datetimeColumnIndex);
+                int currentDatetime = cursor.getInt(datetimeColumnIndex);
 
                 sb.append(("\n" + currentID + " - " +
                         currentName + " - " +
@@ -86,9 +91,15 @@ public class HabitUtils {
                         currentDatetime));
             }
             Log.v("HabitUtil.java", sb.toString());
+            return sb.toString();
+        } catch (Exception e){
+            Log.e("HabitUtil.java", "Exception: " + e.toString());
         } finally {
-            cursor.close();
+            if(cursor != null){
+                cursor.close();
+            }
         }
+        return null;
     }
 
 }
